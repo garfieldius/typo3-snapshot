@@ -1,0 +1,39 @@
+{
+    "name": "grossberger-georg/typo3-snapshot",
+    "description": "Create and restore database and fileadmin snapshots",
+    "license": "Apache-2.0",
+    "type": "typo3-cms-extension",
+    "config": {
+        "bin-dir": "bin/",
+        "platform": {
+            "php": "7.3.6"
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "GrossbergerGeorg\\Snapshot\\": "Classes/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "GrossbergerGeorg\\Snapshot\\Tests\\": "Tests/"
+        }
+    },
+    "require": {
+        "typo3/cms-core": "^9.5",
+        "typo3/cms-extbase": "^9.5",
+        "setasign/fpdf": "^1.8"
+    },
+    "require-dev": {
+        "grossberger-georg/php-dev-tools": "^1.2",
+        "friendsofphp/php-cs-fixer": "^2.14",
+        "phpunit/phpunit": "^8.1",
+        "mikey179/vfsstream": "^1.6"
+    },
+    "extra": {
+        "typo3/cms": {
+            "web-dir": "vendor/_www/"
+        },
+        "installer-name": "snapshot"
+    }
+}
