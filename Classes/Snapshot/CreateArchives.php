@@ -192,15 +192,19 @@ class CreateArchives
 
             case 'jpg':
             case 'jpeg':
-                imagejpeg($img, $target);
+                imagejpeg($img, $target, 60);
                 break;
 
             case 'png':
-                imagepng($img, $target);
+                imagepng($img, $target, 9);
                 break;
 
             case 'webp':
-                imagewebp($img, $target);
+                if (!function_exists('imagewebp')) {
+                    imagepng($img, $target, 9);
+                } else {
+                    imagewebp($img, $target, 60);
+                }
         }
 
         imagedestroy($img);
