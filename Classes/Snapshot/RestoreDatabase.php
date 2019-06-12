@@ -59,6 +59,7 @@ class RestoreDatabase
         foreach ($files as $file) {
             $connectionName = preg_replace('/\\.sql(\\.gz)?$/', '', basename($file));
 
+            $uncompressed = false;
             if (StringUtility::endsWith($file, '.gz')) {
                 $cmd = [
                     'gzip',
@@ -69,6 +70,7 @@ class RestoreDatabase
 
                 GeneralUtility::makeInstance(Process::class, $cmd)->mustRun();
                 $file = substr($file, 0, -3);
+                $uncompressed = true;
             }
 
             $this->logger->info(sprintf('Importing file %s into connection %s', $file, $connectionName));
@@ -91,6 +93,10 @@ class RestoreDatabase
             }
 
             fclose($fh);
+
+            if ($uncompressed) {
+                @unlink($file);
+            }
         }
     }
 }
