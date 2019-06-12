@@ -58,8 +58,8 @@ class RestoreDatabase
 
         foreach ($files as $file) {
             $connectionName = preg_replace('/\\.sql(\\.gz)?$/', '', basename($file));
-
             $uncompressed = false;
+
             if (StringUtility::endsWith($file, '.gz')) {
                 $cmd = [
                     'gzip',
