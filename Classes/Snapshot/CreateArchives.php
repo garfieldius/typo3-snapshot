@@ -62,6 +62,9 @@ class CreateArchives
         $this->log = $log;
     }
 
+    /**
+     * Create a snapshot for each storage
+     */
     public function generate()
     {
         $storages = GeneralUtility::makeInstance(StorageRepository::class)->findByStorageType('Local');
@@ -107,14 +110,22 @@ class CreateArchives
         }
     }
 
+    /**
+     * Create a reduced copy of the given storage inside a temporary directory
+     *
+     * @param ResourceStorage $storage
+     * @param string $sourcePath
+     * @return string
+     */
     private function createReducedFiles(ResourceStorage $storage, string $sourcePath): string
     {
         $path = Environment::getVarPath() . DIRECTORY_SEPARATOR .
-            'snapshot-' . $GLOBALS['EXEC_TIME'] . DIRECTORY_SEPARATOR .
+            'snapshot-tmp-' . $GLOBALS['EXEC_TIME'] . DIRECTORY_SEPARATOR .
             'storage-' . $storage->getUid() . DIRECTORY_SEPARATOR;
 
         GeneralUtility::mkdir_deep($path);
 
+        // Find all referenced files in this storage
         $qb = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('sys_file');
         $qb->select('t0.identifier');
         $qb->from('sys_file', 't0');
@@ -142,6 +153,12 @@ class CreateArchives
         return $path;
     }
 
+    /**
+     * Create a stub, based on the file extension
+     *
+     * @param string $target
+     * @param string $source
+     */
     private function writeStub(string $target, string $source)
     {
         switch (strtolower(pathinfo($target, PATHINFO_EXTENSION))) {
@@ -175,15 +192,25 @@ class CreateArchives
         }
     }
 
+    /**
+     * Write an empty image with the given dimensions to the target file
+     *
+     * @param int $width
+     * @param int $height
+     * @param string $target
+     */
     private function writeImageStub(int $width, int $height, string $target)
     {
+        // Create a new image with the same size as the original
         $img = imagecreatetruecolor($width, $height);
         $bg = imagecolorallocate($img, 255, 255, 255);
         imagefill($img, 0, 0, $bg);
 
+        // Paint the filename on it
         $fg = imagecolorallocate($img, 128, 128, 128);
         imagestring($img, 1, 5, 5, basename($target), $fg);
 
+        // Save to given target file
         switch (strtolower(pathinfo($target, PATHINFO_EXTENSION))) {
             case 'gif':
                 imagetruecolortopalette($img, false, 255);
@@ -200,6 +227,9 @@ class CreateArchives
                 break;
 
             case 'webp':
+                // Webp might not be available, depending on the system
+                // in that case we just save it as png and hope for the best
+                // it's just a stub anyway
                 if (!function_exists('imagewebp')) {
                     imagepng($img, $target, 9);
                 } else {

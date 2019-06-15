@@ -19,7 +19,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\StringUtility;
 
 /**
- * RestoreDatabase
+ * Restore database snapshots by importing all dumps in snapshot directory
  *
  * @author Georg Großberger <contact@grossberger-ge.org>
  */

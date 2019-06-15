@@ -20,7 +20,7 @@ use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
- * CreateDatabase
+ * Create a database snapshot for each configured database
  *
  * @author Georg Großberger <contact@grossberger-ge.org>
  */

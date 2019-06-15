@@ -19,7 +19,7 @@ use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
- * RestoreDatabase
+ * Restore file snapshots by unpacking the archives into the storages base directory
  *
  * @author Georg Großberger <contact@grossberger-ge.org>
  */

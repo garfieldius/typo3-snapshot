@@ -17,7 +17,7 @@ use Psr\Log\LogLevel;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * ConsoleLogger
+ * Simple CLI logger that uses a symfony output to write its data to
  *
  * @author Georg Großberger <contact@grossberger-ge.org>
  */
