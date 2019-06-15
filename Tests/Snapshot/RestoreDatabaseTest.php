@@ -28,6 +28,11 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class RestoreDatabaseTest extends AbstractTestCase
 {
+    protected function setUp(): void
+    {
+        putenv('PATH=/bin' . PATH_SEPARATOR .'/sbin');
+    }
+
     public function testRestore()
     {
         $sql = [
