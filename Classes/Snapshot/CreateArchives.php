@@ -100,6 +100,7 @@ class CreateArchives
                 '*/' . $processedFolder . '/*',
                 '-C',
                 $sourcePath,
+                '.'
             ];
 
             GeneralUtility::makeInstance(Process::class, $cmd)->mustRun();
