@@ -1,13 +1,13 @@
 # TYPO3 snapshot
 
 This is a TYPO3 extension for creating snapshots of the current installation on
-the CLI. It can create and restore them, place stubs for bigger file assets and
+the CLI. It can create and restore them, make stubs for bigger file assets and
 anonymize DB data.
 
 ## Installation
 
-Use composer to add it `composer require grossberger-georg/typo3-snapshot` and
-install it in the Extension Manager.
+Use composer to add it `composer require grossberger-georg/typo3-snapshot` or
+load from TER and install it in the Extension Manager.
 
 The programs `tar` and `gzip` must be available in `$PATH` / `%PATH%`.
 
@@ -16,13 +16,12 @@ The programs `tar` and `gzip` must be available in `$PATH` / `%PATH%`.
 The extension will add two new commands: `snapshot:create` and
 `snapshot:restore`. They can be invoked using the TYPO3 CLI script:
 `./vendor/bin/typo3 snapshot:create|restore`. If the bin-dir setting is changed
-in the composer.json manifest, the commands listed here must be
-adjusted accordingly.
+in the composer.json manifest, the commands listed here must be run accordingly.
 
 ### Creating a snapshot
 
 Running `snapshot:create` will create a snapshot inside the folder
-`snapshot/`, which is inside `ROOT_PATH/var` or `DOCUMENT_ROOT/typo3temp/var`
+`snapshot/`, which is inside `ROOT_PATH/var` or `DOCUMENT_ROOT/typo3temp/var`,
 depending on the setup. A snapshot has a name, which is determined by the name
 of the folder its data is in.
 
@@ -57,8 +56,10 @@ its content in the archive file `1--fileadmin.tar.gz`.
 
 #### The `--small` switch
 
-This is an addition to `--files`. It reduces the size of a snapshot via two
-simple measures:
+This is an addition to `--files`. Adding the switch `--small` has no effect
+without `--files`.
+
+It reduces the size of a snapshot via two simple measures:
 
 **1. Creating stubs:**
 
@@ -66,8 +67,8 @@ This will reduce the size of files which are larger than 100KB.
 
 In case of
 images in a web format (gif, png, jpg and webp), as well as PDF files, a
-placeholder is generates, containing only the file name. Images will be the same
-size as their originals.
+placeholder is generated, containing only the file name as text. Images will
+be the same dimensions as their originals. PDFs will have only one page.
 
 Other filetypes, like binary downloads, will have their content replaced with
 the MD5 checksum of the original content. Their size will be reduced to a fixed
@@ -77,8 +78,6 @@ the MD5 checksum of the original content. Their size will be reduced to a fixed
 
 The table `sys_file_reference` is checked if a file in a storage is actually
 used on the page. If it is not, it is not added to the snapshot.
-
-Adding the switch `--small` has no effect without `--files`.
 
 #### The `--anonymize` switch
 
@@ -91,9 +90,8 @@ empty fields are are left empty.
 
 In case of login information (fe_users and be_users), the fields containing
 the username and the password are not changed. This is because this information
-is functional and cannot be changed without possible side effects.
-
-Internal fields, like the UID, will not be changed as well.
+is functional and cannot be changed without possible side effects. Also internal
+fields, like the UID, will not be changed.
 
 ### Restoring a snapshot
 
@@ -117,12 +115,12 @@ Without the switch `--files`, only the database is restored.
 
 ## Credits
 
-The anonymizer uses static data sets for its operations:
+The anonymizer uses the following static data sets for its operations:
 
-* Personal names are taken from the docker names-generator: <https://github.com/moby/moby/blob/master/pkg/namesgenerator/names-generator.go>
-* Company names are taken from the Fortune 500 List: <http://fortune.com/fortune500/list>
-* Hosts are the main domain names of the Fortune 500 companies websites
-* Countries is the list of country names from EXT:static_info_tables v6.7.4
+* Personal names are based on the docker names-generator: <https://github.com/moby/moby/blob/master/pkg/namesgenerator/names-generator.go>
+* Company names are taken from the Fortune 500 List (2018): <http://fortune.com/fortune500/list>
+* Hosts are the main domain names of the 100 biggest websites.
+* Countries is the list of english country names from EXT:static_info_tables v6.7.4
 * Cities is the list of country capitals from EXT:static_info_tables v6.7.4
 
 ## License
