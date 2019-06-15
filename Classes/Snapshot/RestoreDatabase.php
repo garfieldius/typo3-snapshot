@@ -55,6 +55,21 @@ class RestoreDatabase
     {
         $files = GeneralUtility::getFilesInDir($this->directory, 'sql,sql.gz', true);
         $pool = GeneralUtility::makeInstance(ConnectionPool::class);
+        $mysql = '';
+
+        foreach (explode(PATH_SEPARATOR, (string) getenv('PATH')) as $path) {
+            $bin = $path . DIRECTORY_SEPARATOR . 'mysql';
+
+            if (PHP_OS_FAMILY == 'Windows') {
+                $bin .= '.exe';
+            }
+
+            $this->logger->debug('Looking for mysql binary ' . $bin);
+
+            if (is_file($bin) && is_executable($bin)) {
+                $mysql = $bin;
+            }
+        }
 
         foreach ($files as $file) {
             $connectionName = preg_replace('/\\.sql(\\.gz)?$/', '', basename($file));
@@ -75,29 +90,43 @@ class RestoreDatabase
 
             $this->logger->info(sprintf('Importing file %s into connection %s', $file, $connectionName));
             $connection = $pool->getConnectionByName($connectionName);
-            $fh = fopen($file, 'r');
-            $buffer = '';
 
-            while (!feof($fh)) {
-                $line = fgets($fh, 4096);
+            if ($mysql) {
+                $this->logger->info('Using mysql program for import');
+                $config = $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections'][$connectionName];
+                $program = $mysql .
+                    ' -u' . escapeshellarg($config['user']) .
+                    ' -p' . escapeshellarg($config['password']) .
+                    ' -h' . escapeshellarg($config['host']) .
+                    ' ' . escapeshellarg($config['dbname']) .
+                    ' < ' . escapeshellarg($file);
+                Process::fromShellCommandline($program)->mustRun();
+            } else {
+                $this->logger->info('Using PHP based import');
+                $fh = fopen($file, 'r');
+                $buffer = '';
 
-                if (!is_string($line)) {
-                    break;
+                while (!feof($fh)) {
+                    $line = fgets($fh, 4096);
+
+                    if (!is_string($line)) {
+                        break;
+                    }
+
+                    $buffer .= $line;
+
+                    if (StringUtility::endsWith(rtrim($line), ';')) {
+                        $this->logger->debug($buffer);
+                        $connection->exec($buffer);
+                        $buffer = '';
+                    }
                 }
 
-                $buffer .= $line;
+                fclose($fh);
 
-                if (StringUtility::endsWith(rtrim($line), ';')) {
-                    $this->logger->debug($buffer);
+                if (trim($buffer)) {
                     $connection->exec($buffer);
-                    $buffer = '';
                 }
-            }
-
-            fclose($fh);
-
-            if (trim($buffer)) {
-                $connection->exec($buffer);
             }
 
             if ($uncompressed) {
