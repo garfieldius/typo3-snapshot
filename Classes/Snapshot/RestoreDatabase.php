@@ -80,19 +80,25 @@ class RestoreDatabase
 
             while (!feof($fh)) {
                 $line = fgets($fh, 4096);
+
+                if (!is_string($line)) {
+                    break;
+                }
+
                 $buffer .= $line;
 
                 if (StringUtility::endsWith(rtrim($line), ';')) {
                     $this->logger->debug($buffer);
                     $connection->exec($buffer);
+                    $buffer = '';
                 }
             }
+
+            fclose($fh);
 
             if (trim($buffer)) {
                 $connection->exec($buffer);
             }
-
-            fclose($fh);
 
             if ($uncompressed) {
                 @unlink($file);
