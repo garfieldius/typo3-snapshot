@@ -41,7 +41,7 @@ class CreateArchivesTest extends AbstractTestCase
     public function testGenerate()
     {
         $dataDir = dirname(__DIR__) . '/Data/';
-        $root = vfsStream::setup('root', 0777, [
+        $root = vfsStream::setup('root', null, [
             'var' => [
                 'snapshot' => [
                     'test' => [],

@@ -120,7 +120,7 @@ class CreateArchives
     private function createReducedFiles(ResourceStorage $storage, string $sourcePath): string
     {
         $path = Environment::getVarPath() . DIRECTORY_SEPARATOR .
-            'snapshot-tmp-' . $GLOBALS['EXEC_TIME'] . DIRECTORY_SEPARATOR .
+            'snapshot-' . $GLOBALS['EXEC_TIME'] . DIRECTORY_SEPARATOR .
             'storage-' . $storage->getUid() . DIRECTORY_SEPARATOR;
 
         GeneralUtility::mkdir_deep($path);
