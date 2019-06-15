@@ -4,6 +4,8 @@ This is a TYPO3 extension for creating snapshots of the current installation on
 the CLI. It can create and restore them, make stubs for bigger file assets and
 anonymize DB data.
 
+**IMPORTANT**: Currently this works with MySQL or compatibles only!
+
 ## Installation
 
 Use composer to add it `composer require grossberger-georg/typo3-snapshot` or
