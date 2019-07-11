@@ -106,7 +106,7 @@ class CreateDatabase
                 // Add schema DDL without any collation or charset information
                 $data = $connection->query('SHOW CREATE TABLE `' . $table->getName() . '`')->fetchAll();
                 $sql = end($data[0]);
-                $sql = preg_replace('/\\s*(DEFAULT )?(COLLATE|CHARSET)( |=)[^ ]+/', '', $sql);
+                $sql = preg_replace('/\\s*(DEFAULT )?(COLLATE|CHARSET)( |=)[a-z0-9_]+/', '', $sql);
                 fwrite($fh, $sql . ";\n\n");
 
                 // If the table is ignored, skip adding the data
