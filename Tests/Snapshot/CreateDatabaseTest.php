@@ -22,6 +22,8 @@ use org\bovigo\vfs\vfsStream;
 use Psr\Log\NullLogger;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\Database\Query\QueryBuilder;
+use TYPO3\CMS\Core\Database\Query\Restriction\DefaultRestrictionContainer;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -91,10 +93,13 @@ class CreateDatabaseTest extends AbstractTestCase
         $dataRecordsResult = $this->makeMock(Statement::class);
         $dataRecordsResult->expects(static::any())->method('getIterator')->willReturn(new \ArrayObject($dataRecords));
 
+        $queryBuilder = $this->makeMock(QueryBuilder::class);
+        $queryBuilder->expects(static::atLeastOnce())->method('getRestrictions')->willReturn(new DefaultRestrictionContainer());
+        $queryBuilder->expects(static::atLeastOnce())->method('execute')->willReturn($dataRecordsResult);
+
         $cnx = $this->makeMock(Connection::class);
         $cnx->expects(static::once())->method('getSchemaManager')->willReturn($schemaManager);
-        $cnx->expects(static::once())->method('select')->willReturn($dataRecordsResult);
-        $cnx->expects(static::any())->method('exec');
+        $cnx->expects(static::once())->method('createQueryBuilder')->willReturn($queryBuilder);
         $cnx->expects(static::any())->method('quote')->willReturnCallback(function ($value) {
             return "'${value}'";
         });
