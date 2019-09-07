@@ -79,7 +79,6 @@ class RestoreDatabase
                 $cmd = [
                     'gzip',
                     '-d',
-                    '-k',
                     $file,
                 ];
 
@@ -129,8 +128,15 @@ class RestoreDatabase
                 }
             }
 
+            // If it was decompressed, compress it again
             if ($uncompressed) {
-                @unlink($file);
+                $cmd = [
+                    'gzip',
+                    '-9',
+                    $file,
+                ];
+
+                GeneralUtility::makeInstance(Process::class, $cmd)->mustRun();
             }
         }
     }
