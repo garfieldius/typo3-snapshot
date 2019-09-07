@@ -72,23 +72,6 @@ class CreateDatabase
 
     public function generate()
     {
-        $initStatements = [
-            'SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT;',
-            'SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS;',
-            'SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION;',
-            'SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;',
-            'SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;',
-            'SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;',
-        ];
-
-        $finishStatements = [
-            'SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;',
-            'SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;',
-            'SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT;',
-            'SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS;',
-            'SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION;',
-        ];
-
         GeneralUtility::mkdir_deep($this->directory);
 
         // Create a separate dump for every connection
@@ -97,18 +80,16 @@ class CreateDatabase
             $connection->exec('SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci');
 
             $targetFile = $this->directory . $connectionName . '.sql';
-            $fh = fopen($targetFile, 'wb');
-            fwrite($fh, implode("\n", $initStatements) . "\n\n");
+            $file = GeneralUtility::makeInstance(SQLFile::class, $targetFile, $connection);
 
             foreach ($connection->getSchemaManager()->listTables() as $table) {
                 // Add a drop statement at first
-                fwrite($fh, "DROP TABLE IF EXISTS `{$table->getName()}`;\n");
+                $file->addDropTable($table->getName());
 
                 // Add schema DDL without any collation or charset information
-                $data = $connection->query('SHOW CREATE TABLE `' . $table->getName() . '`')->fetchAll();
-                $sql = end($data[0]);
-                $sql = preg_replace('/\\s*(DEFAULT )?(COLLATE|CHARSET)( |=)[a-z0-9_]+/', '', $sql);
-                fwrite($fh, $sql . ";\n\n");
+                foreach ($connection->getDatabasePlatform()->getCreateTableSQL($table) as $sql) {
+                    $file->addCreateTable($sql);
+                }
 
                 // If the table is ignored, skip adding the data
                 if (preg_match($this->ignoredTables, $table->getName())) {
@@ -128,44 +109,13 @@ class CreateDatabase
                         $this->anomizer->clearRecord($table->getName(), $record);
                     }
 
-                    $fields = [];
-                    $values = [];
-
-                    foreach ($record as $field => $value) {
-                        $fields[] = '`' . $field . '`';
-                        $values[] = $this->encode($connection, $value);
-                    }
-
-                    $fields = implode(', ', $fields);
-                    $values = implode(', ', $values);
-
-                    // Create one insert per record
-                    $sql = sprintf('INSERT INTO `%s` (%s) VALUES (%s);', $table->getName(), $fields, $values);
-                    fwrite($fh, $sql . "\n");
+                    $file->addInsert($table->getName(), $record);
                 }
-
-                fwrite($fh, "\n");
             }
 
-            fwrite($fh, implode("\n", $finishStatements) . "\n\n");
-            fclose($fh);
+            $file->close();
 
             GeneralUtility::makeInstance(Process::class, ['gzip', '-9', $targetFile])->run();
         }
-    }
-
-    private function encode(Connection $cnx, $value): string
-    {
-        if (is_null($value)) {
-            return 'NULL';
-        }
-
-        $value = (string) $value;
-
-        if (preg_match('/^-?[0-9]+(:?\\.[0-9]+)?$/', $value)) {
-            return $value;
-        }
-
-        return $cnx->quote($value);
     }
 }
