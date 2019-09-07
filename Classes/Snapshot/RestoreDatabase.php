@@ -142,7 +142,7 @@ class RestoreDatabase
                     $file,
                 ];
 
-                GeneralUtility::makeInstance(Process::class, $cmd)->mustRun();
+                GeneralUtility::makeInstance(Process::class, $cmd)->run();
             }
         }
     }

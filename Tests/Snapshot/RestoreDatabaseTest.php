@@ -31,6 +31,11 @@ class RestoreDatabaseTest extends AbstractTestCase
     protected function setUp(): void
     {
         putenv('PATH=/bin' . PATH_SEPARATOR .'/sbin');
+        $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default'] = [
+            'user'     => 'typo3',
+            'password' => 'typo3',
+            'dbname'   => 'typo3',
+        ];
     }
 
     public function testRestore()
@@ -51,16 +56,16 @@ class RestoreDatabaseTest extends AbstractTestCase
         ]);
 
         $cnx = $this->makeMock(Connection::class);
-        $cnx->expects(static::any())->method('exec');
+        $cnx->expects(static::atLeastOnce())->method('exec');
 
         $pool = $this->makeMock(ConnectionPool::class);
-        $pool->expects(static::any())
+        $pool->expects(static::atLeastOnce())
             ->method('getConnectionByName')
             ->with(static::equalTo($connectionName))
             ->willReturn($cnx);
 
         $proc = $this->makeMock(Process::class);
-        $proc->expects(static::once())->method('mustRun');
+        $proc->expects(static::any())->method('mustRun');
 
         GeneralUtility::addInstance(ConnectionPool::class, $pool);
         GeneralUtility::addInstance(Process::class, $proc);

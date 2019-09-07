@@ -12,6 +12,7 @@ namespace GrossbergerGeorg\Snapshot\Tests\Snapshot;
  * <https://www.apache.org/licenses/LICENSE-2.0>
  */
 
+use Doctrine\DBAL\Platforms\MySQL57Platform;
 use Doctrine\DBAL\Portability\Statement;
 use Doctrine\DBAL\Schema\MySqlSchemaManager;
 use Doctrine\DBAL\Schema\Table;
@@ -44,36 +45,14 @@ class CreateDatabaseTest extends AbstractTestCase
         $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections'][$connectionName] = [];
 
         $dataTable = new Table('tt_content');
+        $dataTable->addColumn('uid', 'integer');
+        $dataTable->addColumn('title', 'text');
         $cacheTable = new Table('cf_pages');
+        $cacheTable->addColumn('key', 'text', ['length' => 255]);
+        $cacheTable->addColumn('data', 'text');
 
         $schemaManager = $this->makeMock(MySqlSchemaManager::class);
         $schemaManager->expects(static::once())->method('listTables')->willReturn([$dataTable, $cacheTable]);
-
-        $dataSchemaRecords = [
-            [
-                'Table'        => 'tt_content',
-                'Create Table' => 'CREATE TABLE `tt_content` (
-  `uid` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `pid` int(11) NOT NULL DEFAULT 0,
-  `header` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT \'\',
-  PRIMARY KEY (`uid`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
-            ]
-        ];
-
-        $cacheSchemaRecords = [
-            [
-                'Table'        => 'cf_cache_pages',
-                'Create Table' => 'CREATE TABLE `cf_cache_pages` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `identifier` varchar(250) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT \'\',
-  `expires` int(10) unsigned NOT NULL DEFAULT 0,
-  `content` longblob DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `cache_id` (`identifier`(180),`expires`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
-            ]
-        ];
 
         $dataRecords = [
             [
@@ -84,29 +63,22 @@ class CreateDatabaseTest extends AbstractTestCase
             ]
         ];
 
-        $dataSchemaResult = $this->makeMock(Statement::class);
-        $dataSchemaResult->expects(static::any())->method('fetchAll')->willReturn($dataSchemaRecords);
-
-        $cacheSchemaResult = $this->makeMock(Statement::class);
-        $cacheSchemaResult->expects(static::any())->method('fetchAll')->willReturn($cacheSchemaRecords);
-
         $dataRecordsResult = $this->makeMock(Statement::class);
         $dataRecordsResult->expects(static::any())->method('getIterator')->willReturn(new \ArrayObject($dataRecords));
 
         $queryBuilder = $this->makeMock(QueryBuilder::class);
-        $queryBuilder->expects(static::atLeastOnce())->method('getRestrictions')->willReturn(new DefaultRestrictionContainer());
-        $queryBuilder->expects(static::atLeastOnce())->method('execute')->willReturn($dataRecordsResult);
+        $queryBuilder->expects(static::any())->method('getRestrictions')->willReturn(new DefaultRestrictionContainer());
+        $queryBuilder->expects(static::any())->method('execute')->willReturn($dataRecordsResult);
+
+        $platform = new MySQL57Platform();
 
         $cnx = $this->makeMock(Connection::class);
-        $cnx->expects(static::once())->method('getSchemaManager')->willReturn($schemaManager);
-        $cnx->expects(static::once())->method('createQueryBuilder')->willReturn($queryBuilder);
+        $cnx->expects(static::any())->method('getSchemaManager')->willReturn($schemaManager);
+        $cnx->expects(static::any())->method('createQueryBuilder')->willReturn($queryBuilder);
+        $cnx->expects(static::any())->method('getDatabasePlatform')->willReturn($platform);
         $cnx->expects(static::any())->method('quote')->willReturnCallback(function ($value) {
             return "'${value}'";
         });
-        $cnx->expects(static::atLeastOnce())->method('query')->willReturnMap([
-            ['SHOW CREATE TABLE `' . $dataTable->getName() . '`', $dataSchemaResult],
-            ['SHOW CREATE TABLE `' . $cacheTable->getName() . '`', $cacheSchemaResult],
-        ]);
 
         $pool = $this->makeMock(ConnectionPool::class);
         $pool->expects(static::any())
