@@ -73,6 +73,12 @@ class RestoreDatabase
 
         foreach ($files as $file) {
             $connectionName = preg_replace('/\\.sql(\\.gz)?$/', '', basename($file));
+
+            if (empty($GLOBALS['TYPO3_CONF_VARS']['DB']['Connections'][$connectionName])) {
+                $this->logger->error('No connection configured with name ' . $connectionName);
+                continue;
+            }
+
             $uncompressed = false;
 
             if (StringUtility::endsWith($file, '.gz')) {
