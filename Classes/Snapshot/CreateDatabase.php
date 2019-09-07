@@ -104,7 +104,6 @@ class CreateDatabase
                 $queryBuilder->select('*');
                 $queryBuilder->from($table->getName());
                 $queryBuilder->getRestrictions()->removeAll();
-                $queryBuilder->getRestrictions()->add(GeneralUtility::makeInstance(DeletedRestriction::class));
 
                 // Iterate over all records and add them one by one
                 foreach ($queryBuilder->execute() as $record) {
