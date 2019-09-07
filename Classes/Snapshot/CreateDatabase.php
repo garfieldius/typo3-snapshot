@@ -77,10 +77,14 @@ class CreateDatabase
         // Create a separate dump for every connection
         foreach (array_keys($GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']) as $connectionName) {
             $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionByName($connectionName);
-            $connection->exec('SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci');
+            $isMysql = $connection->getDatabasePlatform()->getName() === 'mysql';
+
+            if ($isMysql) {
+                $connection->exec('SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci');
+            }
 
             $targetFile = $this->directory . $connectionName . '.sql';
-            $file = GeneralUtility::makeInstance(SQLFile::class, $targetFile, $connection);
+            $file = GeneralUtility::makeInstance(SQLFile::class, $targetFile, $connection, $isMysql);
 
             foreach ($connection->getSchemaManager()->listTables() as $table) {
                 // Add a drop statement at first
