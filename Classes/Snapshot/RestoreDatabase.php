@@ -90,7 +90,7 @@ class RestoreDatabase
             $this->logger->info(sprintf('Importing file %s into connection %s', $file, $connectionName));
             $connection = $pool->getConnectionByName($connectionName);
 
-            if ($mysql) {
+            if ($mysql && $connection->getDatabasePlatform()->getName() == 'mysql') {
                 $this->logger->info('Using mysql program for import');
                 $config = $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections'][$connectionName];
                 $program = $mysql .
