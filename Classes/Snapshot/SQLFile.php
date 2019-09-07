@@ -1,19 +1,18 @@
 <?php
-
+declare(strict_types=1);
 namespace GrossbergerGeorg\Snapshot\Snapshot;
 
 /*
- * (c) 2019 by Georg Großberger <contact@grossberger-ge.org>
+ * (c) 2019 Georg Großberger <contact@grossberger-ge.org>
  *
- * This is free software; you can redistribute it and/or
- * modify it under the terms of the Apache-2.0 license
+ * This file is free software; you can redistribute it and/or
+ * modify it under the terms of the Apache License 2.0
  *
  * For the full copyright and license information see
  * <https://www.apache.org/licenses/LICENSE-2.0>
  */
 
 use TYPO3\CMS\Core\Database\Connection;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\StringUtility;
 
 /**
