@@ -57,8 +57,15 @@ class RestoreFiles
         $resourceFactory = ResourceFactory::getInstance();
 
         foreach ($files as $file) {
-            list($storageId) = explode('--', basename($file));
-            $storage = $resourceFactory->getStorageObject($storageId);
+            $filename = basename($file);
+            $storageId = (int) substr($filename, 0, strpos($filename, '--'));
+
+            if ($storageId < 0) {
+                $this->logger->error(sprintf('Invalid storage name %s', $filename));
+                continue;
+            }
+
+            $storage = $resourceFactory->getStorageObject((int) $storageId);
             $storagePath = $storage->getConfiguration()['basePath'];
 
             if ($storage->getConfiguration()['pathType'] == 'relative') {
