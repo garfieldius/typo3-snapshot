@@ -101,7 +101,7 @@ class SQLFile
 
     public function close()
     {
-        if ($this->initStatements) {
+        if ($this->useInitStatements) {
             $this->write(...$this->finishStatements);
         }
 
