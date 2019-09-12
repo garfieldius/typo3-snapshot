@@ -87,7 +87,7 @@ class SQLFile
         $values = [];
 
         foreach ($record as $field => $value) {
-            $fields[] = '`' . $field . '`';
+            $fields[] = $field;
             $values[] = $this->encode($value);
         }
 
@@ -95,7 +95,7 @@ class SQLFile
         $values = implode(', ', $values);
 
         // Create one insert per record
-        $sql = sprintf('INSERT INTO `%s` (%s) VALUES (%s);', $table, $fields, $values);
+        $sql = sprintf('INSERT INTO %s (%s) VALUES (%s);', $table, $fields, $values);
         $this->write($sql);
     }
 
