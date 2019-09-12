@@ -111,7 +111,7 @@ class SQLFile
     public function write(string ...$sqls)
     {
         foreach ($sqls as $sql) {
-            if (!StringUtility::endsWith(rtrim($sql), ';')) {
+            if (trim($sql) !== '' && !StringUtility::endsWith(rtrim($sql), ';')) {
                 $sql .= ';';
             }
 
@@ -121,7 +121,7 @@ class SQLFile
 
     private function encode($value): string
     {
-        if (is_null($value)) {
+        if ($value === null) {
             return 'NULL';
         }
 
