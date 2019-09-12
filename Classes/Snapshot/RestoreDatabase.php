@@ -60,7 +60,7 @@ class RestoreDatabase
         foreach (explode(PATH_SEPARATOR, (string) getenv('PATH')) as $path) {
             $bin = $path . DIRECTORY_SEPARATOR . 'mysql';
 
-            if (PHP_OS_FAMILY == 'Windows') {
+            if (PHP_OS_FAMILY === 'Windows') {
                 $bin .= '.exe';
             }
 
@@ -96,7 +96,7 @@ class RestoreDatabase
             $this->logger->info(sprintf('Importing file %s into connection %s', $file, $connectionName));
             $connection = $pool->getConnectionByName($connectionName);
 
-            if ($mysql && $connection->getDatabasePlatform()->getName() == 'mysql') {
+            if ($mysql && $connection->getDatabasePlatform()->getName() === 'mysql') {
                 $this->logger->info('Using mysql program for import');
                 $config = $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections'][$connectionName];
                 $program = $mysql .
@@ -108,7 +108,7 @@ class RestoreDatabase
                 Process::fromShellCommandline($program)->mustRun();
             } else {
                 $this->logger->info('Using PHP based import');
-                $fh = fopen($file, 'r');
+                $fh = fopen($file, 'rb');
                 $buffer = '';
 
                 while (!feof($fh)) {

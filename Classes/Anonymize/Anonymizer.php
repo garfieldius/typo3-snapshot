@@ -98,7 +98,7 @@ class Anonymizer
      * @param string $table
      * @param array $record
      */
-    public function clearRecord(string $table, array &$record)
+    public function clearRecord(string $table, array &$record): void
     {
         if (!empty($this->configuration[$table])) {
             $config = $this->configuration[$table];
@@ -258,17 +258,17 @@ class Anonymizer
             ' ' . random_int(10, 999);
     }
 
-    private function randomCountryName()
+    private function randomCountryName(): string
     {
         return RandomList::of(RandomList::COUNTRY)->get();
     }
 
-    private function randomCity()
+    private function randomCity(): string
     {
         return RandomList::of(RandomList::CITY)->get();
     }
 
-    private function randomCompany()
+    private function randomCompany(): string
     {
         return RandomList::of(RandomList::COMPANY)->get();
     }
@@ -282,7 +282,7 @@ class Anonymizer
         return (string) random_int($min, $max);
     }
 
-    private function randomSocial()
+    private function randomSocial(): string
     {
         return '@' . strtolower(str_replace(' ', '.', $this->randomName()));
     }

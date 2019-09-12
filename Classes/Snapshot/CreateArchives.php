@@ -82,7 +82,7 @@ class CreateArchives
             $sourcePath = $storage->getConfiguration()['basePath'];
 
             // Relative basePaths are relative to the public directory
-            if ($storage->getConfiguration()['pathType'] == 'relative') {
+            if ($storage->getConfiguration()['pathType'] === 'relative') {
                 $sourcePath = Environment::getPublicPath() . DIRECTORY_SEPARATOR . $sourcePath;
             }
 

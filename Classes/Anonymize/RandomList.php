@@ -64,6 +64,6 @@ class RandomList
      */
     public function get(): string
     {
-        return $this->values[mt_rand(0, $this->max)];
+        return $this->values[random_int(0, $this->max)];
     }
 }

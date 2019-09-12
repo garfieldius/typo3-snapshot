@@ -68,7 +68,7 @@ class RestoreFiles
             $storage = $resourceFactory->getStorageObject((int) $storageId);
             $storagePath = $storage->getConfiguration()['basePath'];
 
-            if ($storage->getConfiguration()['pathType'] == 'relative') {
+            if ($storage->getConfiguration()['pathType'] === 'relative') {
                 $storagePath = Environment::getPublicPath() . DIRECTORY_SEPARATOR . $storagePath;
             }
 
