@@ -15,12 +15,23 @@ script:
   - php bin/php-cs-fixer fix --config=.php_cs -vvv --dry-run
 
 jobs:
-  fast_finish: true
   include:
-    - stage: Testing PHP 7.2
+    - stage: PHP 7.2 & TYPO3 v9
       php: 7.2
-    - stage: Testing PHP 7.3
+    - stage: PHP 7.3 & TYPO3 v9
       php: 7.3
+    - stage: PHP 7.2 & TYPO3 v10
+      php: 7.2
+      script:
+        - >
+          composer require --no-suggest --ansi -n typo3/cms-core:^10.0 typo3/cms-extbase:^10.0
+          php bin/phpunit -c phpunit.xml
+    - stage: PHP 7.3 & TYPO3 v10
+      php: 7.3
+      script:
+        - >
+          composer require --no-suggest --ansi -n typo3/cms-core:^10.0 typo3/cms-extbase:^10.0
+          php bin/phpunit -c phpunit.xml
     - stage: Upload to TER
       if: tag IS present AND env(TYPO3_ORG_USERNAME) IS present AND env(TYPO3_ORG_PASSWORD) IS present
       php: 7.2
