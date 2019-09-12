@@ -13,6 +13,7 @@ namespace GrossbergerGeorg\Snapshot\Snapshot;
  */
 
 use TYPO3\CMS\Core\Database\Connection;
+use TYPO3\CMS\Core\Utility\MathUtility;
 use TYPO3\CMS\Core\Utility\StringUtility;
 
 /**
@@ -127,7 +128,7 @@ class SQLFile
         $value = (string) $value;
 
         // Only write simple numbers as literals
-        if (preg_match('/^-?[0-9]+(:?\\.[0-9]+)?$/', $value)) {
+        if (MathUtility::canBeInterpretedAsInteger($value) || MathUtility::canBeInterpretedAsFloat($value)) {
             return $value;
         }
 
