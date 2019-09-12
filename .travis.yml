@@ -8,7 +8,7 @@ cache:
     - $HOME/.composer
 
 install:
-  - composer install --no-suggest --ansi -n
+  - composer install --no-suggest --ansi -n --no-progress
 
 script:
   - php bin/phpunit -c phpunit.xml
@@ -23,15 +23,13 @@ jobs:
     - stage: PHP 7.2 & TYPO3 v10
       php: 7.2
       script:
-        - >
-          composer require --no-suggest --ansi -n typo3/cms-core:^10.0 typo3/cms-extbase:^10.0
-          php bin/phpunit -c phpunit.xml
+        - composer require --no-suggest --ansi -n --no-progress typo3/cms-core:^10.0 typo3/cms-extbase:^10.0
+        - php bin/phpunit -c phpunit.xml
     - stage: PHP 7.3 & TYPO3 v10
       php: 7.3
       script:
-        - >
-          composer require --no-suggest --ansi -n typo3/cms-core:^10.0 typo3/cms-extbase:^10.0
-          php bin/phpunit -c phpunit.xml
+        - composer require --no-suggest --ansi -n --no-progress typo3/cms-core:^10.0 typo3/cms-extbase:^10.0
+        - php bin/phpunit -c phpunit.xml
     - stage: Upload to TER
       if: tag IS present AND env(TYPO3_ORG_USERNAME) IS present AND env(TYPO3_ORG_PASSWORD) IS present
       php: 7.2
@@ -41,5 +39,5 @@ jobs:
       script:
         - >
           TAG_MESSAGE=$(git tag -n10 -l $TRAVIS_TAG | sed 's/^v*[0-9.]*[ ]*//g');
-          composer global require helhum/ter-client;
+          composer global require --no-progress --ansi -n --no-suggest helhum/ter-client;
           $HOME/.composer/vendor/bin/ter-client upload snapshot . -u "$TYPO3_ORG_USERNAME" -p "$TYPO3_ORG_PASSWORD" -m "$TAG_MESSAGE";
