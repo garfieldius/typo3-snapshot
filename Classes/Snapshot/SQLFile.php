@@ -17,7 +17,7 @@ use TYPO3\CMS\Core\Utility\MathUtility;
 use TYPO3\CMS\Core\Utility\StringUtility;
 
 /**
- * SQLFile
+ * Helper for SQL file generations
  *
  * @author Georg Großberger <contact@grossberger-ge.org>
  */
@@ -49,6 +49,7 @@ class SQLFile
      * @var Connection
      */
     private $connection;
+
     /**
      * @var bool
      */
@@ -58,6 +59,7 @@ class SQLFile
      * SQLFile constructor.
      * @param string $file
      * @param Connection $connection
+     * @param bool $useInitStatements
      */
     public function __construct(string $file, Connection $connection, bool $useInitStatements)
     {
@@ -70,18 +72,33 @@ class SQLFile
         }
     }
 
-    public function addDropTable(string $table)
+    /**
+     * Add a drop table statement
+     *
+     * @param string $table
+     */
+    public function addDropTable(string $table): void
     {
-        $this->write("DROP TABLE IF EXISTS `{$table}`;");
+        $this->write("DROP TABLE IF EXISTS {$table};");
     }
 
-    public function addCreateTable(string $sql)
+    /**
+     * Add a SQL statement, treat it as a create table DDL
+     * @param string $sql
+     */
+    public function addCreateTable(string $sql): void
     {
         $sql = preg_replace('/\\s*(DEFAULT )?(COLLATE|CHARSET)( |=)[a-z0-9_]+/', '', trim($sql));
-        $this->write(rtrim($sql, ';') . ";\n");
+        $this->write(rtrim($sql, "\n\r\t\0 ;") . ';');
     }
 
-    public function addInsert(string $table, array $record)
+    /**
+     * Create an insert statement for given record and table
+     *
+     * @param string $table
+     * @param array $record
+     */
+    public function addInsert(string $table, array $record): void
     {
         $fields = [];
         $values = [];
@@ -99,7 +116,10 @@ class SQLFile
         $this->write($sql);
     }
 
-    public function close()
+    /**
+     * Close file pointer
+     */
+    public function close(): void
     {
         if ($this->useInitStatements) {
             $this->write(...$this->finishStatements);
@@ -108,7 +128,12 @@ class SQLFile
         fclose($this->fileHandle);
     }
 
-    public function write(string ...$sqls)
+    /**
+     * Write given string to file
+     *
+     * @param string ...$sqls
+     */
+    private function write(string ...$sqls): void
     {
         foreach ($sqls as $sql) {
             if (trim($sql) !== '' && !StringUtility::endsWith(rtrim($sql), ';')) {
@@ -119,6 +144,12 @@ class SQLFile
         }
     }
 
+    /**
+     * Get a SQL value from given PHP value
+     *
+     * @param $value
+     * @return string
+     */
     private function encode($value): string
     {
         if ($value === null) {
