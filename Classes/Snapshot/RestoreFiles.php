@@ -16,6 +16,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Process\Process;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
+use TYPO3\CMS\Core\Resource\ResourceStorageInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -51,12 +52,17 @@ class RestoreFiles
         $this->directory = $directory;
     }
 
-    public function restore()
+    /**
+     * Run restore files for set directory
+     */
+    public function restore(): void
     {
+        // Find archives in snapshot
         $files = GeneralUtility::getFilesInDir($this->directory, 'tar,tar.gz', true);
         $resourceFactory = ResourceFactory::getInstance();
 
         foreach ($files as $file) {
+            // Get UID of storage
             $filename = basename($file);
             $storageId = (int) substr($filename, 0, strpos($filename, '--'));
 
@@ -65,7 +71,15 @@ class RestoreFiles
                 continue;
             }
 
-            $storage = $resourceFactory->getStorageObject((int) $storageId);
+            // Get storage of given UID
+            $storage = $resourceFactory->getStorageObject($storageId);
+
+            if (!$storage instanceof ResourceStorageInterface || $storage->getDriverType() !== 'Local') {
+                $this->logger->error('No local driver storage "' . $filename . '" with UID ' . $storageId);
+                continue;
+            }
+
+            // Extract into root path of the storage
             $storagePath = $storage->getConfiguration()['basePath'];
 
             if ($storage->getConfiguration()['pathType'] === 'relative') {

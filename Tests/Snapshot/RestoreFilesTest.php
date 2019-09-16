@@ -62,6 +62,7 @@ class RestoreFilesTest extends AbstractTestCase
         $storage->expects(static::any())
             ->method('getConfiguration')
             ->willReturn(['pathType' => 'relative', 'basePath' => 'fileadmin/']);
+        $storage->expects(static::any())->method('getDriverType')->willReturn('Local');
         $resourceFactory = $this->makeMock(ResourceFactory::class);
         $resourceFactory->expects(static::once())
             ->method('getStorageObject')
