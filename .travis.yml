@@ -25,7 +25,7 @@ jobs:
       install: skip
       script:
         - composer remove --ansi -n typo3/cms-core typo3/cms-extbase || true
-        - rm -f composer.lock
+        - rm -rf composer.lock vendor bin
         - composer require --no-suggest --ansi -n --no-progress typo3/cms-core:^10.0 typo3/cms-extbase:^10.0 || true
         - php bin/phpunit -c phpunit.xml
     - stage: PHP 7.3 & TYPO3 v10
@@ -33,7 +33,7 @@ jobs:
       install: skip
       script:
         - composer remove --ansi -n typo3/cms-core typo3/cms-extbase || true
-        - rm -f composer.lock
+        - rm -rf composer.lock vendor bin
         - composer require --no-suggest --ansi -n --no-progress typo3/cms-core:^10.0 typo3/cms-extbase:^10.0 || true
         - php bin/phpunit -c phpunit.xml
     - stage: Upload to TER
