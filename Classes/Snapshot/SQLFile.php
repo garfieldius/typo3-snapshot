@@ -12,7 +12,6 @@ namespace GrossbergerGeorg\Snapshot\Snapshot;
  * <https://www.apache.org/licenses/LICENSE-2.0>
  */
 
-use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Utility\StringUtility;
 
 /**
@@ -52,7 +51,6 @@ class SQLFile
     /**
      * SQLFile constructor.
      * @param string $file
-     * @param Connection $connection
      * @param bool $useInitStatements
      */
     public function __construct(string $file, bool $useInitStatements)
