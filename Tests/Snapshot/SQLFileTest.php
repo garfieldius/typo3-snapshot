@@ -37,34 +37,29 @@ class SQLFileTest extends TestCase
 
         $table = 'tx_snapshot';
         $create = 'CREATE TABLE tx_snapshot_test (uid int(11))';
-        $data = ['uid' => 1, 'name' => 'Hello', 'ref' => null];
 
         $expected =
             "DROP TABLE IF EXISTS ${table};\n" .
-            "${create};\n" .
-            "INSERT INTO ${table} (uid, name, ref) VALUES (1, 'Hello', NULL);\n";
+            "${create};\n";
 
         $file = $fs->getChild('generic.sql')->url();
 
-        $subject = new SQLFile($file, $cnx, false);
+        $subject = new SQLFile($file, false);
         $subject->addDropTable($table);
         $subject->addCreateTable($create);
-        $subject->addInsert($table, $data);
         $subject->close();
 
         static::assertStringEqualsFile($file, $expected);
 
         $expected =
             "DROP TABLE IF EXISTS ${table};\n" .
-            "${create};\n" .
-            "INSERT INTO ${table} (uid, name, ref) VALUES (1, 'Hello', NULL);\n";
+            "${create};\n";
 
         $file = $fs->getChild('mysql.sql')->url();
 
-        $subject = new SQLFile($file, $cnx, false);
+        $subject = new SQLFile($file, false);
         $subject->addDropTable($table);
         $subject->addCreateTable($create);
-        $subject->addInsert($table, $data);
         $subject->close();
 
         static::assertStringContainsString(file_get_contents($file), $expected);

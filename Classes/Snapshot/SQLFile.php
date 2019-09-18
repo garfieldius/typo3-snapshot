@@ -13,7 +13,6 @@ namespace GrossbergerGeorg\Snapshot\Snapshot;
  */
 
 use TYPO3\CMS\Core\Database\Connection;
-use TYPO3\CMS\Core\Utility\MathUtility;
 use TYPO3\CMS\Core\Utility\StringUtility;
 
 /**
@@ -46,11 +45,6 @@ class SQLFile
     ];
 
     /**
-     * @var Connection
-     */
-    private $connection;
-
-    /**
      * @var bool
      */
     private $useInitStatements;
@@ -61,10 +55,9 @@ class SQLFile
      * @param Connection $connection
      * @param bool $useInitStatements
      */
-    public function __construct(string $file, Connection $connection, bool $useInitStatements)
+    public function __construct(string $file, bool $useInitStatements)
     {
         $this->fileHandle = fopen($file, 'wb+');
-        $this->connection = $connection;
         $this->useInitStatements = $useInitStatements;
 
         if ($this->useInitStatements) {
@@ -93,30 +86,6 @@ class SQLFile
     }
 
     /**
-     * Create an insert statement for given record and table
-     *
-     * @param string $table
-     * @param array $record
-     */
-    public function addInsert(string $table, array $record): void
-    {
-        $fields = [];
-        $values = [];
-
-        foreach ($record as $field => $value) {
-            $fields[] = $field;
-            $values[] = $this->encode($value);
-        }
-
-        $fields = implode(', ', $fields);
-        $values = implode(', ', $values);
-
-        // Create one insert per record
-        $sql = sprintf('INSERT INTO %s (%s) VALUES (%s);', $table, $fields, $values);
-        $this->write($sql);
-    }
-
-    /**
      * Close file pointer
      */
     public function close(): void
@@ -133,7 +102,7 @@ class SQLFile
      *
      * @param string ...$sqls
      */
-    private function write(string ...$sqls): void
+    public function write(string ...$sqls): void
     {
         foreach ($sqls as $sql) {
             if (trim($sql) !== '' && !StringUtility::endsWith(rtrim($sql), ';')) {
@@ -142,27 +111,5 @@ class SQLFile
 
             fwrite($this->fileHandle, $sql . "\n");
         }
-    }
-
-    /**
-     * Get a SQL value from given PHP value
-     *
-     * @param $value
-     * @return string
-     */
-    private function encode($value): string
-    {
-        if ($value === null) {
-            return 'NULL';
-        }
-
-        $value = (string) $value;
-
-        // Only write simple numbers as literals
-        if (MathUtility::canBeInterpretedAsInteger($value) || MathUtility::canBeInterpretedAsFloat($value)) {
-            return $value;
-        }
-
-        return $this->connection->quote($value);
     }
 }

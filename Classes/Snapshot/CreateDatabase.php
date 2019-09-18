@@ -18,6 +18,7 @@ use Symfony\Component\Process\Process;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Utility\MathUtility;
 
 /**
  * Create a database snapshot for each configured database
@@ -83,7 +84,7 @@ class CreateDatabase
             }
 
             $targetFile = $this->directory . $connectionName . '.sql';
-            $file = GeneralUtility::makeInstance(SQLFile::class, $targetFile, $connection, $isMysql);
+            $file = GeneralUtility::makeInstance(SQLFile::class, $targetFile, $isMysql);
 
             foreach ($connection->getSchemaManager()->listTables() as $table) {
                 // Add a drop statement at first
@@ -104,6 +105,9 @@ class CreateDatabase
                 $queryBuilder->from($table->getName());
                 $queryBuilder->getRestrictions()->removeAll();
 
+                $insert = $connection->createQueryBuilder();
+                $insert->getRestrictions()->removeAll();
+
                 // Iterate over all records and add them one by one
                 foreach ($queryBuilder->execute() as $record) {
                     // Anonymize record if requested
@@ -111,7 +115,22 @@ class CreateDatabase
                         $this->anomizer->clearRecord($table->getName(), $record);
                     }
 
-                    $file->addInsert($table->getName(), $record);
+                    $values = [];
+
+                    foreach ($record as $field => $value) {
+                        if ($value === null) {
+                            $values[$field] = 'NULL';
+                        } elseif (MathUtility::canBeInterpretedAsInteger($value) || MathUtility::canBeInterpretedAsFloat($value)) {
+                            $values[$field] = (string) $value;
+                        } else {
+                            $values[$field] = $connection->quote($value);
+                        }
+                    }
+
+                    $insert->insert($table->getName());
+                    $insert->values($values, false);
+
+                    $file->write($insert->getSQL());
                 }
             }
 
