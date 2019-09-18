@@ -66,7 +66,7 @@ class RestoreFiles
             $filename = basename($file);
             $storageId = (int) substr($filename, 0, strpos($filename, '--'));
 
-            if ($storageId < 0) {
+            if ($storageId < 1) {
                 $this->logger->error(sprintf('Invalid storage name %s', $filename));
                 continue;
             }
