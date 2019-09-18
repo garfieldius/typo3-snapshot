@@ -30,6 +30,44 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class SnapshotRestoreTest extends AbstractTestCase
 {
+    public function testRestoreErrorsSnapshotDoesNotExist()
+    {
+        $name = 'test';
+        $fs = vfsStream::setup('project', null, [
+            'var' => [
+                'snapshot' => [
+                    $name . '-other' => [
+                        'Default.sql'         => 'empty',
+                        '1--fileadmin.tar.gz' => 'empty',
+                    ]
+                ]
+            ],
+            'public' => [],
+            'config' => [],
+        ]);
+
+        Environment::initialize(
+            new ApplicationContext('Testing'),
+            true,
+            true,
+            $fs->url(),
+            $fs->getChild('public')->url(),
+            $fs->getChild('var')->url(),
+            $fs->getChild('config')->url(),
+            '',
+            ''
+        );
+
+        $subject = new SnapshotRestore();
+
+        $input = new ArrayInput(['name' => $name], $subject->getDefinition());
+        $output = new NullOutput();
+
+        $this->expectException(\RuntimeException::class);
+
+        $subject->run($input, $output);
+    }
+
     public function testRestore()
     {
         $name = 'test';
