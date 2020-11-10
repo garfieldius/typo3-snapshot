@@ -3,7 +3,7 @@ declare(strict_types=1);
 namespace GrossbergerGeorg\Snapshot;
 
 /*
- * (c) 2019 Georg Großberger <contact@grossberger-ge.org>
+ * (c) 2020 Georg Großberger <contact@grossberger-ge.org>
  *
  * This file is free software; you can redistribute it and/or
  * modify it under the terms of the Apache License 2.0
