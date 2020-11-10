@@ -59,7 +59,7 @@ class RestoreFiles
     {
         // Find archives in snapshot
         $files = GeneralUtility::getFilesInDir($this->directory, 'tar,tar.gz', true);
-        $resourceFactory = ResourceFactory::getInstance();
+        $resourceFactory = GeneralUtility::makeInstance(ResourceFactory::class);
 
         foreach ($files as $file) {
             // Get UID of storage
