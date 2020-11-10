@@ -84,5 +84,7 @@ vendor/bin/typo3 snapshot:restore dev -f
             $files->setLogger($logger);
             $files->restore();
         }
+
+        return 0;
     }
 }

@@ -116,5 +116,7 @@ vendor/bin/typo3 snapshot:create dev -f -s -a
             $archive->setSmall($input->hasOption('small') && $input->getOption('small'));
             $archive->generate();
         }
+
+        return 0;
     }
 }
