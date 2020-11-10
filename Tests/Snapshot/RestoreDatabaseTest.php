@@ -12,6 +12,7 @@ namespace GrossbergerGeorg\Snapshot\Tests\Snapshot;
  * <https://www.apache.org/licenses/LICENSE-2.0>
  */
 
+use Doctrine\DBAL\Platforms\PostgreSQL94Platform;
 use GrossbergerGeorg\PHPDevTools\Testing\AbstractTestCase;
 use GrossbergerGeorg\Snapshot\Snapshot\RestoreDatabase;
 use org\bovigo\vfs\vfsStream;
@@ -33,6 +34,7 @@ class RestoreDatabaseTest extends AbstractTestCase
         putenv('PATH=/bin' . PATH_SEPARATOR .'/sbin');
         $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default'] = [
             'user'     => 'typo3',
+            'host'     => 'typo3',
             'password' => 'typo3',
             'dbname'   => 'typo3',
         ];
@@ -57,6 +59,7 @@ class RestoreDatabaseTest extends AbstractTestCase
 
         $cnx = $this->makeMock(Connection::class);
         $cnx->expects(static::atLeastOnce())->method('exec');
+        $cnx->expects(static::any())->method('getDatabasePlatform')->willReturn(new PostgreSQL94Platform());
 
         $pool = $this->makeMock(ConnectionPool::class);
         $pool->expects(static::atLeastOnce())
