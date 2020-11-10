@@ -1,0 +1,54 @@
+name: 'Test & Lint'
+
+on: [push, pull_request]
+
+jobs:
+  lint:
+    name: Linting
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: nanasess/setup-php@master
+        with:
+          php-version: 7.4
+
+      - name: Lint code
+        run: |
+          composer install --no-scripts --no-plugins --ignore-platform-reqs --no-progress --ansi
+          bin/php-cs-fixer fix --config=.php_cs --diff --dry-run
+
+  test:
+    name: Testing
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        typo3:
+          - '9.5'
+          - '10.4'
+        php:
+          - '7.2'
+          - '7.3'
+          - '7.4'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: nanasess/setup-php@master
+        with:
+          php-version: ${{ matrix.php }}
+
+      - name: Test TYPO3 ${{ matrix.typo3 }} on ${{ matrix.php }}
+        run: |
+          rm -rf composer.lock vendor bin typo3_src typo3 index.php
+          cat composer.json | jq 'del(.require)' > c.json
+          rm composer.json
+          mv c.json composer.json
+          composer require --ansi --no-progress --no-plugins --no-scripts typo3/cms-core:^${{ matrix.typo3 }} typo3/cms-extbase:^${{ matrix.typo3 }} setasign/fpdf:^1.8
+          php bin/phpunit -c phpunit.xml
