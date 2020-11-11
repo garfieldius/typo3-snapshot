@@ -50,5 +50,5 @@ jobs:
           cat composer.json | jq 'del(.require)' > c.json
           rm composer.json
           mv c.json composer.json
-          composer require --ansi --no-progress --no-plugins --no-scripts typo3/cms-core:^${{ matrix.typo3 }} typo3/cms-extbase:^${{ matrix.typo3 }} setasign/fpdf:^1.8
+          composer require --ansi --no-progress --no-plugins --no-scripts --ignore-platform-reqs typo3/cms-core:^${{ matrix.typo3 }} typo3/cms-extbase:^${{ matrix.typo3 }} setasign/fpdf:^1.8
           php bin/phpunit -c phpunit.xml
